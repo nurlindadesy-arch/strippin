@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strippin - Web Photobooth</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Menggunakan font Kalam untuk memberikan kesan tulisan tangan/marker seperti di desain -->
+    <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Library html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <style>
+        /* Mengatur font utama dan background polkadot */
+        body {
+            font-family: 'Kalam', cursive;
+            background-color: #fdfbf9;
+            background-image: radial-gradient(#ebebeb 15%, transparent 16%);
+            background-size: 60px 60px;
+            color: #5c0a0a; /* Warna merah maroon gelap khas desain */
+            overflow-x: hidden;
+        }
+
+        /* Utility class untuk border tebal maroon */
+        .border-maroon {
+            border: 4px solid #5c0a0a;
+        }
+
+        /* Class untuk mengatur perpindahan halaman (Single Page Application) */
+        .page-screen {
+            display: none;
+            min-height: 100vh;
+            width: 100%;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+        
+        .page-screen.active {
+            display: flex;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Custom scrollbar untuk gallery */
+        .hide-scroll::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scroll {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Efek Hover Interaktif (Memenuhi kriteria UI/UX) */
+        .interactive-element {
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+        .interactive-element:hover {
+            transform: scale(1.05);
+        }
+        .interactive-element:active {
+            transform: scale(0.95);
+        }
+    </style>
+    
+    <script>
+        // KODE PINTAR (FALLBACK): Otomatis cari .jpg kalau .png gagal dimuat
+        function fallbackImg(img, fallbackSrc) {
+            if (!img.hasAttribute('data-fallback')) {
+                img.setAttribute('data-fallback', 'true');
+                img.src = fallbackSrc;
+            }
+        }
+    </script>
+</head>
+<body>
+
+    <!-- PAGE 1: HOME (STRIPPIN 1) -->
+    <div id="page-home-1" class="page-screen active">
+        <h1 class="text-6xl font-bold mb-6 tracking-widest bg-white/50 px-8 py-2 rounded-xl">STRIPPIN</h1>
+        
+        <div class="flex flex-col md:flex-row items-center gap-8 w-full max-w-5xl justify-center">
+            <!-- Frame Utama (Tengah) -->
+            <div class="border-maroon bg-white w-full max-w-3xl p-6 relative flex justify-center gap-8 shadow-xl">
+                <!-- Simulasi Strip 1 -->
+                <div class="w-32 bg-white border-2 border-black p-2 flex flex-col gap-2 relative shadow-md">
+                    <div class="absolute inset-0 border-[8px] border-dotted border-black pointer-events-none"></div>
+                    <div class="w-full aspect-[3/4] bg-gray-400 z-10"></div>
+                    <div class="w-full aspect-[3/4] bg-gray-400 z-10 rounded-full"></div>
+                    <div class="w-full aspect-[3/4] bg-gray-400 z-10"></div>
+                </div>
+                <!-- Simulasi Strip 2 -->
+                <div class="w-32 bg-white border-2 border-gray-300 flex flex-col gap-2 relative shadow-md overflow-hidden transform translate-y-4">
+                    <div class="w-full h-16 bg-[#5c0a0a] flex items-center justify-center relative"><div class="absolute w-full h-full border-[6px] border-dotted border-white pointer-events-none"></div></div>
+                    <div class="w-full aspect-[3/4] bg-gray-400 mx-auto w-[90%] rounded-full mt-2"></div>
+                    <div class="w-full aspect-[3/4] bg-gray-400 mx-auto w-[90%] mb-2"></div>
+                    <div class="w-full h-4 bg-stripes flex gap-1 justify-center"><div class="w-1 h-full bg-gray-400"></div><div class="w-1 h-full bg-gray-400"></div></div>
+                </div>
+                <!-- Simulasi Strip 3 -->
+                <div class="w-32 bg-black p-2 flex flex-col gap-2 shadow-md transform rotate-6">
+                    <div class="w-full aspect-[3/4] bg-gray-300"></div>
+                    <div class="w-full aspect-[3/4] bg-gray-300"></div>
+                    <div class="w-full aspect-[3/4] bg-gray-300"></div>
+                </div>
+            </div>
+
+            <!-- Tombol Next -->
+            <div class="flex flex-col items-center">
+                <span class="text-green-700 font-bold mb-2">next</span>
+                <div id="btn-next-home1" class="border-maroon bg-white p-3 flex flex-col items-center gap-4 interactive-element shadow-lg">
+                    <div class="w-12 h-12 bg-green-700 rounded-full border-2 border-black"></div>
+                    <div class="w-2 h-20 border-2 border-maroon"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tombol Suffle -->
+        <button id="btn-shuffle-1" class="mt-8 border-maroon bg-white px-8 py-2 text-3xl rounded-xl flex items-center gap-4 interactive-element shadow-lg">
+            suffle 
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+        </button>
+    </div>
+
+    <!-- PAGE 2: HOME (STRIPPIN 2) -->
+    <div id="page-home-2" class="page-screen">
+        <h1 class="text-6xl font-bold mb-6 tracking-widest bg-white/50 px-8 py-2 rounded-xl">STRIPPIN</h1>
+        <div class="flex flex-col md:flex-row items-center gap-8 w-full max-w-5xl justify-center">
+            <!-- Frame Utama -->
+            <div class="border-maroon bg-white w-full max-w-3xl p-6 relative flex justify-center gap-8 shadow-xl">
+                <div class="w-32 bg-yellow-200 border-2 border-black p-2 flex flex-col gap-2 shadow-md">
+                    <div class="w-full aspect-square bg-gray-400 border-2 border-red-500 rounded-lg"></div>
+                    <div class="w-full aspect-[3/4] bg-gray-400 border-2 border-blue-500 rounded-lg"></div>
+                </div>
+                <div class="w-32 bg-blue-100 border-2 border-black p-2 flex flex-col gap-2 shadow-md transform -translate-y-2">
+                    <div class="w-full aspect-square bg-blue-300 rounded-full flex items-center justify-center text-xs"></div>
+                    <div class="w-full aspect-square bg-gray-400 rounded-full border-4 border-white"></div>
+                    <div class="w-full aspect-square bg-blue-300 rounded-full flex items-center justify-center text-xs"></div>
+                </div>
+                <div class="w-32 bg-pink-200 border-2 border-yellow-400 p-2 border-dashed flex flex-col gap-2 shadow-md transform rotate-3">
+                    <div class="w-full aspect-[3/4] bg-gray-400 border border-black"></div>
+                    <div class="w-full aspect-[3/4] bg-gray-400 border border-black"></div>
+                    <div class="w-full aspect-[3/4] bg-gray-400 border border-black"></div>
+                </div>
+            </div>
+            <!-- Tombol Next -->
+            <div class="flex flex-col items-center">
+                <span class="text-green-700 font-bold mb-2">next</span>
+                <div id="btn-next-home2" class="border-maroon bg-white p-3 flex flex-col items-center gap-4 interactive-element shadow-lg">
+                    <div class="w-12 h-12 bg-green-700 rounded-full border-2 border-black"></div>
+                    <div class="w-2 h-20 border-2 border-maroon"></div>
+                </div>
+            </div>
+        </div>
+        <button id="btn-shuffle-2" class="mt-8 border-maroon bg-white px-8 py-2 text-3xl rounded-xl flex items-center gap-4 interactive-element shadow-lg">
+            suffle 
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+        </button>
+    </div>
+
+    <!-- PAGE 3: CHOOSE STRIP 1 -->
+    <div id="page-choose-1" class="page-screen relative">
+        <button id="btn-back-choose1" class="absolute top-8 left-8 border-maroon bg-white p-2 rounded-full interactive-element shadow-md">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#5c0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        </button>
+        
+        <div class="flex flex-col md:flex-row items-center gap-12 mt-12 w-full max-w-4xl">
+            <div class="text-center md:text-right text-3xl leading-tight font-bold w-32">
+                choose <br> <span class="inline-block transform rotate-90 md:rotate-0">→</span> <br> strip
+            </div>
+            
+            <div class="border-maroon border-[6px] bg-white p-4 pb-12 w-full max-w-sm relative flex justify-center items-center shadow-xl flex-1 h-[400px]">
+                <div class="border-maroon bg-white absolute inset-2 pointer-events-none"></div>
+                <div class="relative z-10 w-24 bg-gray-400 border border-black flex flex-col shadow-lg transform rotate-6">
+                    <div class="w-full aspect-[4/3] border-b border-black"></div>
+                    <div class="w-full aspect-[4/3] border-b border-black"></div>
+                    <div class="w-full aspect-[4/3]"></div>
+                </div>
+                <button id="btn-right-choose1" class="absolute right-4 z-20 text-4xl interactive-element">&gt;</button>
+            </div>
+        </div>
+
+        <div class="flex flex-col md:flex-row items-end gap-8 mt-12 w-full max-w-3xl">
+            <div class="border-maroon bg-white p-4 rounded-xl flex-1 flex gap-4 text-sm shadow-md divide-x-2 divide-[#5c0a0a]">
+                <div class="flex-1 px-2"><div class="w-6 h-6 rounded-full border border-maroon flex items-center justify-center text-xs mb-2">1</div>Pilih b&w atau funny strip dengan klik b&w atau ceria</div>
+                <div class="flex-1 px-4"><div class="w-6 h-6 rounded-full border border-maroon flex items-center justify-center text-xs mb-2">2</div>klik frame yang akan kamu gunakan</div>
+                <div class="flex-1 px-4"><div class="w-6 h-6 rounded-full border border-maroon flex items-center justify-center text-xs mb-2">3</div>klik print untuk mendownload frame strip yang kamu mau</div>
+            </div>
+
+            <div class="flex flex-col items-center gap-2 cursor-pointer interactive-element" id="btn-bw-toggle-1">
+                <span class="font-bold text-xl">b&w</span>
+                <div class="w-12 h-16 border-maroon border-[3px] bg-white rounded-full relative flex justify-center p-1">
+                    <div class="w-8 h-8 border-[3px] border-maroon rounded-full bg-white absolute top-1"></div>
+                </div>
+                <span class="font-bold text-xl">ceria</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 4: CHOOSE STRIP 2 -->
+    <div id="page-choose-2" class="page-screen relative">
+        <button id="btn-back-choose2" class="absolute top-8 left-8 border-maroon bg-white p-2 rounded-full interactive-element shadow-md">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#5c0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        </button>
+        <div class="flex flex-col md:flex-row items-center gap-12 mt-12 w-full max-w-4xl">
+            <div class="text-center md:text-right text-3xl leading-tight font-bold w-32">
+                choose <br> <span class="inline-block transform rotate-90 md:rotate-0">→</span> <br> strip
+            </div>
+            <div class="border-maroon border-[6px] bg-white p-4 pb-12 w-full max-w-sm relative flex justify-center items-center shadow-xl flex-1 h-[400px]">
+                <div class="border-maroon bg-white absolute inset-2 pointer-events-none"></div>
+                <button id="btn-left-choose2" class="absolute left-4 z-20 text-4xl interactive-element">&lt;</button>
+                <div class="relative z-10 w-28 bg-pink-300 p-2 flex flex-col gap-2 shadow-lg transform -rotate-3">
+                    <div class="w-full aspect-square bg-gray-400 border-2 border-yellow-400 border-dashed"></div>
+                    <div class="w-full aspect-square bg-gray-400 border-2 border-yellow-400 border-dashed"></div>
+                    <div class="w-full aspect-square bg-gray-400 border-2 border-yellow-400 border-dashed"></div>
+                </div>
+                <button id="btn-right-choose2" class="absolute right-4 z-20 text-4xl interactive-element">&gt;</button>
+            </div>
+        </div>
+        
+        <div class="flex flex-col md:flex-row items-end gap-8 mt-12 w-full max-w-3xl">
+            <div class="border-maroon bg-white p-4 rounded-xl flex-1 flex gap-4 text-sm shadow-md divide-x-2 divide-[#5c0a0a]">
+                <div class="flex-1 px-2"><div class="w-6 h-6 rounded-full border border-maroon flex items-center justify-center text-xs mb-2">1</div>Pilih b&w atau funny strip dengan klik b&w atau ceria</div>
+                <div class="flex-1 px-4"><div class="w-6 h-6 rounded-full border border-maroon flex items-center justify-center text-xs mb-2">2</div>klik frame yang akan kamu gunakan</div>
+                <div class="flex-1 px-4"><div class="w-6 h-6 rounded-full border border-maroon flex items-center justify-center text-xs mb-2">3</div>klik print untuk mendownload frame strip yang kamu mau</div>
+            </div>
+            <div class="flex flex-col items-center gap-2 cursor-pointer interactive-element" id="btn-bw-toggle-2">
+                <span class="font-bold text-xl">b&w</span>
+                <div class="w-12 h-16 border-maroon border-[3px] bg-white rounded-full relative flex justify-center p-1"><div class="w-8 h-8 border-[3px] border-maroon rounded-full bg-white absolute top-1"></div></div>
+                <span class="font-bold text-xl">ceria</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 5: CHOOSE STRIP 3 -->
+    <div id="page-choose-3" class="page-screen relative">
+        <button id="btn-back-choose3" class="absolute top-8 left-8 border-maroon bg-white p-2 rounded-full interactive-element shadow-md">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#5c0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        </button>
+        <div class="flex flex-col md:flex-row items-center gap-12 mt-12 w-full max-w-4xl">
+            <div class="text-center md:text-right text-3xl leading-tight font-bold w-32">
+                choose <br> <span class="inline-block transform rotate-90 md:rotate-0">→</span> <br> strip
+            </div>
+            <div class="border-maroon border-[6px] bg-white p-4 pb-12 w-full max-w-sm relative flex justify-center items-center shadow-xl flex-1 h-[400px]">
+                <div class="border-maroon bg-white absolute inset-2 pointer-events-none"></div>
+                <button id="btn-left-choose3" class="absolute left-4 z-20 text-4xl interactive-element">&lt;</button>
+                <div class="relative z-10 flex flex-col gap-1 shadow-lg transform -rotate-6">
+                    <div class="w-24 bg-white p-1 pb-4 border border-gray-300 shadow-sm"><div class="w-full aspect-[4/3] bg-gray-400"></div></div>
+                    <div class="w-24 bg-white p-1 pb-4 border border-gray-300 shadow-sm"><div class="w-full aspect-[4/3] bg-gray-400"></div></div>
+                    <div class="w-24 bg-white p-1 pb-4 border border-gray-300 shadow-sm"><div class="w-full aspect-[4/3] bg-gray-400"></div></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="flex flex-col md:flex-row items-end gap-8 mt-12 w-full max-w-3xl">
+            <div class="border-maroon bg-white p-4 rounded-xl flex-1 flex gap-4 text-sm shadow-md divide-x-2 divide-[#5c0a0a]">
+                <div class="flex-1 px-2"><div class="w-6 h-6 rounded-full border border-maroon flex items-center justify-center text-xs mb-2">1</div>Pilih b&w atau funny strip dengan klik b&w atau ceria</div>
+                <div class="flex-1 px-4"><div class="w-6 h-6 rounded-full border border-maroon flex items-center justify-center text-xs mb-2">2</div>klik frame yang akan kamu gunakan</div>
+                <div class="flex-1 px-4"><div class="w-6 h-6 rounded-full border border-maroon flex items-center justify-center text-xs mb-2">3</div>klik print untuk mendownload frame strip yang kamu mau</div>
+            </div>
+            <div class="flex flex-col items-center gap-2 cursor-pointer interactive-element" id="btn-bw-toggle-3">
+                <span class="font-bold text-xl">b&w</span>
+                <div class="w-12 h-16 border-maroon border-[3px] bg-white rounded-full relative flex justify-center p-1"><div class="w-8 h-8 border-[3px] border-maroon rounded-full bg-white absolute top-1"></div></div>
+                <span class="font-bold text-xl">ceria</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 6: GALLERY STRIP B&W -->
+    <div id="page-gallery-bw" class="page-screen relative !justify-start pt-24">
+        <button id="btn-back-gallery-bw" class="absolute top-8 left-8 border-maroon bg-white p-2 rounded-full interactive-element shadow-md">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#5c0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        </button>
+
+        <div class="flex flex-col md:flex-row items-center gap-8 mb-12 w-full max-w-4xl px-4">
+            <div class="border-maroon bg-white p-4 rounded-xl flex gap-4 text-sm shadow-md divide-x-2 divide-[#5c0a0a] w-full">
+                <div class="flex-1 px-2"><div class="w-6 h-6 rounded-full border border-maroon flex items-center justify-center text-xs mb-2">1</div>Pilih b&w atau funny strip dengan klik b&w atau ceria</div>
+                <div class="flex-1 px-4"><div class="w-6 h-6 rounded-full border border-maroon flex items-center justify-center text-xs mb-2">2</div>klik frame yang akan kamu gunakan</div>
+                <div class="flex-1 px-4"><div class="w-6 h-6 rounded-full border border-maroon flex items-center justify-center text-xs mb-2">3</div>upload gambar yang kamu mau, klik print untuk mencetak</div>
+            </div>
+            <div class="flex flex-col items-center gap-1 cursor-pointer interactive-element" id="btn-toggle-to-ceria">
+                <span class="font-bold">b&w</span>
+                <div class="w-8 h-12 border-maroon border-[2px] bg-white rounded-full relative flex justify-center p-1"><div class="w-5 h-5 border-[2px] border-maroon rounded-full bg-white absolute top-1"></div></div>
+                <span class="font-bold">ceria</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl w-full px-4 mb-20">
+            <div id="btn-select-bw-1" class="cursor-pointer interactive-element mx-auto w-24 hover:scale-105"><img src="bw 1.png" onerror="fallbackImg(this, 'bw 1.jpg')" class="w-full drop-shadow-md rounded-md object-contain"></div>
+            <div id="btn-select-bw-2" class="cursor-pointer interactive-element mx-auto w-24 hover:scale-105"><img src="bw 2.png" onerror="fallbackImg(this, 'bw 2.jpg')" class="w-full drop-shadow-md rounded-md object-contain"></div>
+            <div id="btn-select-bw-3" class="cursor-pointer interactive-element mx-auto w-24 hover:scale-105"><img src="bw 3.png" onerror="fallbackImg(this, 'bw 3.jpg')" class="w-full drop-shadow-md rounded-md object-contain"></div>
+            <div id="btn-select-bw-4" class="cursor-pointer interactive-element mx-auto w-24 hover:scale-105"><img src="bw 4.png" onerror="fallbackImg(this, 'bw 4.jpg')" class="w-full drop-shadow-md rounded-md object-contain"></div>
+            <div id="btn-select-bw-5" class="cursor-pointer interactive-element mx-auto w-24 hover:scale-105"><img src="bw 5.png" onerror="fallbackImg(this, 'bw 5.jpg')" class="w-full drop-shadow-md rounded-md object-contain"></div>
+            <div id="btn-select-bw-6" class="cursor-pointer interactive-element mx-auto w-24 hover:scale-105"><img src="bw 6.png" onerror="fallbackImg(this, 'bw 6.jpg')" class="w-full drop-shadow-md rounded-md object-contain"></div>
+            <div id="btn-select-bw-7" class="cursor-pointer interactive-element mx-auto w-24 hover:scale-105"><img src="bw 7.png" onerror="fallbackImg(this, 'bw 7.jpg')" class="w-full drop-shadow-md rounded-md object-contain"></div>
+            <div id="btn-select-bw-8" class="cursor-pointer interactive-element mx-auto w-24 hover:scale-105"><img src="bw 8.png" onerror="fallbackImg(this, 'bw 8.jpg')" class="w-full drop-shadow-md rounded-md object-contain"></div>
+        </div>
+    </div>
+
+    <!-- PAGE 7: GALLERY STRIP CERIA -->
+    <div id="page-gallery-ceria" class="page-screen relative !justify-start pt-24">
+        <button id="btn-back-gallery-ceria" class="absolute top-8 left-8 border-maroon bg-white p-2 rounded-full interactive-element shadow-md">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#5c0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        </button>
+
+        <div class="flex flex-col md:flex-row items-center gap-8 mb-12 w-full max-w-4xl px-4">
+            <div class="border-maroon bg-white p-4 rounded-xl flex gap-4 text-sm shadow-md divide-x-2 divide-[#5c0a0a] w-full">
+                <div class="flex-1 px-2"><div class="w-6 h-6 rounded-full border border-maroon flex items-center justify-center text-xs mb-2">1</div>Pilih b&w atau funny strip dengan klik b&w atau ceria</div>
+                <div class="flex-1 px-4"><div class="w-6 h-6 rounded-full border border-maroon flex items-center justify-center text-xs mb-2">2</div>klik frame yang akan kamu gunakan</div>
+                <div class="flex-1 px-4"><div class="w-6 h-6 rounded-full border border-maroon flex items-center justify-center text-xs mb-2">3</div>upload gambar yang kamu mau, klik print untuk mencetak</div>
+            </div>
+            <div class="flex flex-col items-center gap-1 cursor-pointer interactive-element" id="btn-toggle-to-bw">
+                <span class="font-bold">b&w</span>
+                <div class="w-8 h-12 border-maroon border-[2px] bg-white rounded-full relative flex justify-center p-1"><div class="w-5 h-5 border-[2px] border-maroon rounded-full bg-white absolute bottom-1"></div></div>
+                <span class="font-bold text-pink-600">ceria</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl w-full px-4 mb-20">
+            <div id="btn-select-ceria-1" class="cursor-pointer interactive-element mx-auto w-24 hover:scale-105"><img src="ceria 1.png" onerror="fallbackImg(this, 'ceria 1.jpg')" class="w-full drop-shadow-md rounded-md object-contain"></div>
+            <div id="btn-select-ceria-2" class="cursor-pointer interactive-element mx-auto w-24 hover:scale-105"><img src="ceria 2.png" onerror="fallbackImg(this, 'ceria 2.jpg')" class="w-full drop-shadow-md rounded-md object-contain"></div>
+            <div id="btn-select-ceria-3" class="cursor-pointer interactive-element mx-auto w-24 hover:scale-105"><img src="ceria 3.png" onerror="fallbackImg(this, 'ceria 3.jpg')" class="w-full drop-shadow-md rounded-md object-contain"></div>
+            <div id="btn-select-ceria-4" class="cursor-pointer interactive-element mx-auto w-24 hover:scale-105"><img src="ceria 4.png" onerror="fallbackImg(this, 'ceria 4.jpg')" class="w-full drop-shadow-md rounded-md object-contain"></div>
+            <div id="btn-select-ceria-5" class="cursor-pointer interactive-element mx-auto w-24 hover:scale-105"><img src="ceria 5.png" onerror="fallbackImg(this, 'ceria 5.jpg')" class="w-full drop-shadow-md rounded-md object-contain"></div>
+            <div id="btn-select-ceria-6" class="cursor-pointer interactive-element mx-auto w-24 hover:scale-105"><img src="ceria 6.png" onerror="fallbackImg(this, 'ceria 6.jpg')" class="w-full drop-shadow-md rounded-md object-contain"></div>
+            <div id="btn-select-ceria-7" class="cursor-pointer interactive-element mx-auto w-24 hover:scale-105"><img src="ceria 7.png" onerror="fallbackImg(this, 'ceria 7.jpg')" class="w-full drop-shadow-md rounded-md object-contain"></div>
+            <div id="btn-select-ceria-8" class="cursor-pointer interactive-element mx-auto w-24 hover:scale-105"><img src="ceria 8.png" onerror="fallbackImg(this, 'ceria 8.jpg')" class="w-full drop-shadow-md rounded-md object-contain"></div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- CONTAINER UNTUK HALAMAN "YOUR STRIP" (1-16)-->
+    <!-- (Digenerate otomatis pakai JavaScript)     -->
+    <!-- ========================================== -->
+    <div id="dynamic-bw-pages"></div>
+    <div id="dynamic-ceria-pages"></div>
+
+    <script>
+        // FUNGSI UNTUK MENGHASILKAN HALAMAN YOUR STRIP (Mencegah kode kepotong)
+        function generateYourStripPages(type) {
+            const container = document.getElementById(`dynamic-${type}-pages`);
+            const prefix = type === 'bw' ? 'bw' : 'ceria';
+            let htmlContent = '';
+            
+            for (let i = 1; i <= 8; i++) {
+                // Rotasi bergantian agar estetik
+                const rotation = (i % 2 === 0) ? '-rotate-2' : 'rotate-2';
+                
+                htmlContent += `
+                <div id="page-your-${type}-${i}" class="page-screen relative">
+                    <button id="btn-back-your-${type}-${i}" class="absolute top-8 left-8 border-maroon bg-white p-2 rounded-full interactive-element shadow-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#5c0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                    </button>
+                    <div class="flex flex-col md:flex-row items-center gap-12 mt-12 w-full max-w-4xl justify-center">
+                        <div class="text-center md:text-right text-3xl leading-tight font-bold w-32">your <br> <span class="inline-block transform rotate-90 md:rotate-0">→</span> <br> strip</div>
+                        <div class="border-maroon border-[6px] bg-white p-4 pb-12 w-full max-w-md relative flex justify-center items-center shadow-xl h-[450px]">
+                            <div class="border-maroon bg-white absolute inset-2 pointer-events-none"></div>
+                            <div class="relative z-10 transform ${rotation} shadow-lg">
+                                <div id="capture-strip-${type}-${i}" class="w-32">
+                                    <img src="${prefix} ${i}.png" onerror="fallbackImg(this, '${prefix} ${i}.jpg')" class="w-full drop-shadow-md rounded-md object-contain">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col md:flex-row items-end gap-4 mt-12 w-full max-w-3xl">
+                        <div class="border-maroon bg-white p-4 rounded-xl flex-1 flex gap-4 text-sm shadow-md divide-x-2 divide-[#5c0a0a]">
+                            <div class="flex-1 px-2"><div class="w-6 h-6 rounded-full border border-maroon flex items-center justify-center text-xs mb-2">1</div>Pilih b&w atau funny strip dengan klik b&w atau ceria</div>
+                            <div class="flex-1 px-4"><div class="w-6 h-6 rounded-full border border-maroon flex items-center justify-center text-xs mb-2">2</div>klik frame yang akan kamu gunakan</div>
+                            <div class="flex-1 px-4"><div class="w-6 h-6 rounded-full border border-maroon flex items-center justify-center text-xs mb-2">3</div>klik print untuk mendownload frame strip yang kamu mau</div>
+                        </div>
+                        <div class="flex flex-col">
+                            <div id="btn-print-${type}-${i}" class="border-maroon bg-white p-2 rounded-t-lg interactive-element flex justify-center shadow-md cursor-pointer"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#5c0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg></div>
+                            <div class="border-maroon bg-white w-24 h-24 rounded-b-lg border-t-0 p-2 flex justify-center relative"><div class="w-16 h-full border-2 border-maroon border-b-0 absolute top-0"></div></div>
+                        </div>
+                    </div>
+                </div>`;
+            }
+            container.innerHTML = htmlContent;
+        }
+
+        // Jalankan fungsi pembuatan halaman sebelum set event listeners
+        generateYourStripPages('bw');
+        generateYourStripPages('ceria');
+
+        // ==========================================
+        // LOGIKA NAVIGASI
+        // ==========================================
+        const allPages = document.querySelectorAll('.page-screen');
+        function showPage(pageId) {
+            allPages.forEach(p => p.classList.remove('active'));
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) {
+                targetPage.classList.add('active');
+                window.scrollTo(0, 0);
+            }
+        }
+
+        // Home Navigation
+        document.getElementById('btn-next-home1').addEventListener('click', () => showPage('page-home-2'));
+        document.getElementById('btn-shuffle-1').addEventListener('click', () => showPage('page-home-2'));
+        document.getElementById('btn-next-home2').addEventListener('click', () => showPage('page-choose-1'));
+        document.getElementById('btn-shuffle-2').addEventListener('click', () => showPage('page-choose-1'));
+
+        // Choose Navigation
+        document.getElementById('btn-back-choose1').addEventListener('click', () => showPage('page-home-2'));
+        document.getElementById('btn-right-choose1').addEventListener('click', () => showPage('page-choose-2'));
+        document.getElementById('btn-bw-toggle-1').addEventListener('click', () => showPage('page-gallery-bw'));
+        
+        document.getElementById('btn-back-choose2').addEventListener('click', () => showPage('page-choose-1'));
+        document.getElementById('btn-left-choose2').addEventListener('click', () => showPage('page-choose-1'));
+        document.getElementById('btn-right-choose2').addEventListener('click', () => showPage('page-choose-3'));
+        document.getElementById('btn-bw-toggle-2').addEventListener('click', () => showPage('page-gallery-ceria'));
+
+        document.getElementById('btn-back-choose3').addEventListener('click', () => showPage('page-choose-2'));
+        document.getElementById('btn-left-choose3').addEventListener('click', () => showPage('page-choose-2'));
+        document.getElementById('btn-bw-toggle-3').addEventListener('click', () => showPage('page-gallery-bw'));
+
+        // Gallery Navigation
+        document.getElementById('btn-toggle-to-ceria').addEventListener('click', () => showPage('page-gallery-ceria'));
+        document.getElementById('btn-toggle-to-bw').addEventListener('click', () => showPage('page-gallery-bw'));
+        document.getElementById('btn-back-gallery-bw').addEventListener('click', () => showPage('page-choose-1'));
+        document.getElementById('btn-back-gallery-ceria').addEventListener('click', () => showPage('page-choose-1'));
+
+        // Detail & Print Navigation
+        ['bw', 'ceria'].forEach(type => {
+            const galleryId = type === 'bw' ? 'page-gallery-bw' : 'page-gallery-ceria';
+            for (let i = 1; i <= 8; i++) {
+                // Pilih strip dari gallery
+                const btnSelect = document.getElementById(`btn-select-${type}-${i}`);
+                if(btnSelect) btnSelect.addEventListener('click', () => showPage(`page-your-${type}-${i}`));
+
+                // Tombol back
+                const btnBack = document.getElementById(`btn-back-your-${type}-${i}`);
+                if(btnBack) btnBack.addEventListener('click', () => showPage(galleryId));
+
+                // Tombol Print
+                const btnPrint = document.getElementById(`btn-print-${type}-${i}`);
+                if(btnPrint) {
+                    btnPrint.addEventListener('click', function() {
+                        const img = document.querySelector(`#capture-strip-${type}-${i} img`);
+                        if(img && img.src) {
+                            const originalBg = this.style.backgroundColor;
+                            this.style.backgroundColor = '#dcfce7'; // Berubah warna menjadi hijau sejenak
+                            
+                            const link = document.createElement('a');
+                            link.href = img.src; // Langsung download gambarnya
+                            link.download = `Strippin_${type.toUpperCase()}_${i}.png`;
+                            link.click();
+                            
+                            setTimeout(() => { this.style.backgroundColor = originalBg; }, 1000);
+                        }
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+</html>
